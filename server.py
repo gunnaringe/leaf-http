@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from flask import Flask
 from flask import request, Response
 import pycarwings2
@@ -44,3 +46,6 @@ def get_climate_status():
     is_running = leaf.get_latest_hvac_status().is_hvac_running
     status = "on" if is_running else "off"
     return "Climate control: %s" % status
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')
