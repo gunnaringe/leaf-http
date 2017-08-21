@@ -5,6 +5,7 @@ from flask import request, Response
 import pycarwings2
 from functools import wraps
 from pycarwings2 import CarwingsError
+from threading import Thread
 
 app = Flask(__name__)
 
@@ -24,19 +25,24 @@ def get_leaf(auth):
 
 @app.route('/climate/start', methods=['POST'])
 def start_climate_control():
-    leaf = get_leaf(request.authorization)
+    Thread(target = start_climate_control_job, args=(request.authorization,)).start()
+    return "Starting climate control"
+    
+def start_climate_control_job(auth):
+    leaf = get_leaf(auth)
     if leaf is None: return authenticate()
 
     leaf.start_climate_control()
-    return "Starting climate control"
 
 @app.route('/climate/stop', methods=['POST'])
 def stop_climate_control():
-    leaf = get_leaf(request.authorization)
-    if leaf is None: return authenticate()
-
-    leaf.stop_climate_control()
+    Thread(target = stop_climate_control_job, args=(request.authorization,)).start()
     return "Stopping climate control"
+
+def stop_climate_control_job(auth):
+    leaf = get_leaf(auth)
+    if leaf is None: return authenticate()
+    leaf.stop_climate_control()
 
 @app.route('/climate/status', methods=['GET'])
 def get_climate_status():
